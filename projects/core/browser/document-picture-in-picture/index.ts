@@ -137,6 +137,26 @@ export function documentPictureInPicture(
       }
     };
 
+    const copyStyles = (pipWin: Window): void => {
+      [...document.styleSheets].forEach(styleSheet => {
+        try {
+          const cssRules = [...styleSheet.cssRules].map(rule => rule.cssText).join('');
+          const style = pipWin.document.createElement('style');
+          style.textContent = cssRules;
+          pipWin.document.head.appendChild(style);
+        } catch {
+          if (styleSheet.href) {
+            const link = pipWin.document.createElement('link');
+            link.rel = 'stylesheet';
+            link.type = styleSheet.type;
+            link.media = styleSheet.media.mediaText;
+            link.href = styleSheet.href;
+            pipWin.document.head.appendChild(link);
+          }
+        }
+      });
+    };
+
     const exit = (): void => {
       const targetEl = toElement.untracked(target);
       const currentWindow = untracked(pipWindow);
@@ -171,6 +191,7 @@ export function documentPictureInPicture(
         return;
       }
 
+      copyStyles(pipWin);
       pipWin.document.body.append(targetEl);
       pipWindow.set(pipWin);
 

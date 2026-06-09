@@ -215,4 +215,44 @@ describe(documentPictureInPicture.name, () => {
 
     expect(mockPipWindow.close).toHaveBeenCalled();
   });
+
+  it('should copy same-origin stylesheets as inline styles', async () => {
+    const mockCssRule = { cssText: '.test { color: red; }' };
+    const mockStyleSheet = {
+      cssRules: [mockCssRule],
+      href: null,
+    };
+    jest.spyOn(document, 'styleSheets', 'get').mockReturnValue([mockStyleSheet] as any);
+
+    const { component } = createComponent();
+    await component.pip.enter();
+
+    expect(mockPipWindow.document.head.appendChild).toHaveBeenCalledWith(
+      expect.objectContaining({ textContent: '.test { color: red; }' })
+    );
+  });
+
+  it('should copy cross-origin stylesheets as link elements', async () => {
+    const mockStyleSheet = {
+      get cssRules() {
+        throw new DOMException('SecurityError');
+      },
+      href: 'https://cdn.example.com/styles.css',
+      type: 'text/css',
+      media: { mediaText: 'screen' },
+    };
+    jest.spyOn(document, 'styleSheets', 'get').mockReturnValue([mockStyleSheet] as any);
+
+    const { component } = createComponent();
+    await component.pip.enter();
+
+    expect(mockPipWindow.document.head.appendChild).toHaveBeenCalledWith(
+      expect.objectContaining({
+        rel: 'stylesheet',
+        href: 'https://cdn.example.com/styles.css',
+        type: 'text/css',
+        media: 'screen',
+      })
+    );
+  });
 });
