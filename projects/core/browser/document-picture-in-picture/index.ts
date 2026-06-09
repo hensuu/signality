@@ -121,16 +121,82 @@ export function documentPictureInPicture(
       };
     }
 
+    const destroyRef = inject(DestroyRef);
+
     const pipWindow = signal<Window | null>(null);
     const isActive = computed(() => pipWindow() !== null);
+
+    let originalParent: HTMLElement | null = null;
+    let originalNextSibling: Node | null = null;
+
+    const restoreElement = (targetEl: HTMLElement): void => {
+      if (originalParent) {
+        originalParent.insertBefore(targetEl, originalNextSibling);
+        originalParent = null;
+        originalNextSibling = null;
+      }
+    };
+
+    const exit = (): void => {
+      const targetEl = toElement.untracked(target);
+      const currentWindow = untracked(pipWindow);
+      if (currentWindow) {
+        if (targetEl) {
+          restoreElement(targetEl);
+        }
+        pipWindow.set(null);
+        currentWindow.close();
+      }
+    };
+
+    const enter = async (): Promise<void> => {
+      const targetEl = toElement.untracked(target);
+      ngDevMode && assertElement(targetEl, 'documentPictureInPicture');
+      if (!targetEl) return;
+
+      exit();
+
+      originalParent = targetEl.parentElement;
+      originalNextSibling = targetEl.nextSibling;
+
+      const pipWin = await (window as any).documentPictureInPicture.requestWindow({
+        width: options?.width,
+        height: options?.height,
+        disallowReturnToOpener: options?.disallowReturnToOpener,
+        preferInitialWindowPlacement: options?.preferInitialWindowPlacement,
+      });
+
+      if (destroyRef.destroyed) {
+        pipWin.close();
+        return;
+      }
+
+      pipWin.document.body.append(targetEl);
+      pipWindow.set(pipWin);
+
+      pipWin.addEventListener('pagehide', () => {
+        restoreElement(targetEl);
+        pipWindow.set(null);
+      }, { once: true });
+    };
+
+    const toggle = async (): Promise<void> => {
+      if (untracked(isActive)) {
+        exit();
+      } else {
+        await enter();
+      }
+    };
+
+    onCleanup(exit);
 
     return {
       isSupported,
       isActive,
       window: pipWindow.asReadonly(),
-      enter: NOOP_ASYNC_FN,
-      exit: NOOP_FN,
-      toggle: NOOP_ASYNC_FN,
+      enter,
+      exit,
+      toggle,
     };
   });
 }
