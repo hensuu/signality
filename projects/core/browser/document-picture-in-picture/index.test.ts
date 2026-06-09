@@ -138,4 +138,81 @@ describe(documentPictureInPicture.name, () => {
     expect(component.pip.isActive()).toBe(false);
     expect(mockPipWindow.close).toHaveBeenCalled();
   });
+
+  it('should restore element and reset signals on pagehide', async () => {
+    const { component } = createComponent();
+
+    await component.pip.enter();
+
+    const pagehideCall = mockPipWindow.addEventListener.mock.calls.find(
+      (call: any[]) => call[0] === 'pagehide'
+    );
+    expect(pagehideCall).toBeDefined();
+
+    const pagehideHandler = pagehideCall[1];
+    pagehideHandler();
+
+    expect(component.pip.isActive()).toBe(false);
+    expect(component.pip.window()).toBeNull();
+  });
+
+  it('should register pagehide listener with once option', async () => {
+    const { component } = createComponent();
+
+    await component.pip.enter();
+
+    expect(mockPipWindow.addEventListener).toHaveBeenCalledWith(
+      'pagehide',
+      expect.any(Function),
+      { once: true }
+    );
+  });
+
+  it('should close previous PiP window when enter is called while active', async () => {
+    const { component } = createComponent();
+
+    await component.pip.enter();
+
+    const firstWindow = { ...mockPipWindow, close: jest.fn(), addEventListener: jest.fn() };
+    const secondWindow = { ...mockPipWindow, close: jest.fn(), addEventListener: jest.fn() };
+
+    requestWindowSpy
+      .mockResolvedValueOnce(firstWindow)
+      .mockResolvedValueOnce(secondWindow);
+
+    mockPipWindow = firstWindow;
+    await component.pip.enter();
+
+    mockPipWindow = secondWindow;
+    await component.pip.enter();
+
+    expect(firstWindow.close).toHaveBeenCalled();
+    expect(component.pip.window()).toBe(secondWindow);
+  });
+
+  it('should close PiP window when component is destroyed during enter', async () => {
+    let resolveWindow!: (win: any) => void;
+    requestWindowSpy.mockReturnValue(new Promise(resolve => {
+      resolveWindow = resolve;
+    }));
+
+    const { fixture, component } = createComponent();
+
+    const enterPromise = component.pip.enter();
+    fixture.destroy();
+
+    resolveWindow(mockPipWindow);
+    await enterPromise;
+
+    expect(mockPipWindow.close).toHaveBeenCalled();
+  });
+
+  it('should close PiP window on cleanup', async () => {
+    const { fixture, component } = createComponent();
+
+    await component.pip.enter();
+    fixture.destroy();
+
+    expect(mockPipWindow.close).toHaveBeenCalled();
+  });
 });
