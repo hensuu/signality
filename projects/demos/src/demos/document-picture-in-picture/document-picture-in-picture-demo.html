@@ -1,0 +1,106 @@
+<ng-demo-wrapper [demoPath]="'document-picture-in-picture/document-picture-in-picture-demo'" [code]="importCode">
+  @if (!pip.isSupported()) {
+    <demo-not-supported
+      title="Not Supported"
+      description="Document Picture-in-Picture requires a Chromium-based browser or Firefox 151+."
+      [hints]="['Chrome 116+', 'Edge 116+', 'Firefox 151+']"
+    >
+      <svg
+        width="28"
+        height="28"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <rect x="2" y="3" width="20" height="14" rx="2" />
+        <rect x="12" y="11" width="9" height="7" rx="1" />
+      </svg>
+    </demo-not-supported>
+  } @else {
+    <demo-card>
+      <div class="dpip-wrap">
+        <!-- Hidden target element that gets moved into PiP window -->
+        <div #content class="dpip-content" [class.dpip-content--hidden]="!isActive()">
+          <div class="dpip-widget">
+            <div class="dpip-widget-header">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+              <span>Mini Widget</span>
+            </div>
+            <p class="dpip-widget-body">
+              This HTML content is floating in a Picture-in-Picture window.
+            </p>
+            <button class="dpip-widget-btn" (click)="handleToggle()">
+              Back to page
+            </button>
+          </div>
+        </div>
+
+        <!-- Icon ring -->
+        <div class="dpip-visual">
+          <div class="dpip-radar" [class.dpip-radar--active]="isActive()">
+            <div class="dpip-radar-ring dpip-radar-ring--1"></div>
+            <div class="dpip-radar-ring dpip-radar-ring--2"></div>
+            <div class="dpip-radar-ring dpip-radar-ring--3"></div>
+            <div
+              class="dpip-icon-ring"
+              [class.dpip-icon-ring--active]="isActive()"
+              [class.dpip-icon-ring--idle]="!isActive()"
+            >
+              <div class="dpip-icon-inner">
+                <svg
+                  width="26"
+                  height="26"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="2" y="3" width="20" height="14" rx="2" />
+                  <rect class="dpip-float-rect" x="12" y="11" width="9" height="7" rx="1" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Text -->
+        <div class="dpip-text">
+          <h3 class="dpip-title">{{ isActive() ? 'Document PiP' : 'Inactive' }}</h3>
+          <p class="dpip-subtitle">
+            {{
+              isActive()
+                ? 'HTML content is floating in a separate window'
+                : 'Float any HTML content above other windows'
+            }}
+          </p>
+        </div>
+
+        <!-- Button -->
+        <demo-button
+          variant="secondary"
+          size="sm"
+          (click)="handleToggle()"
+        >
+          {{ isActive() ? 'Exit PiP' : 'Enter PiP' }}
+        </demo-button>
+      </div>
+    </demo-card>
+  }
+</ng-demo-wrapper>

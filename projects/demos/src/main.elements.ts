@@ -22,6 +22,7 @@ import { ClipboardDemo } from './demos/clipboard/clipboard-demo';
 import { DebouncedDemo } from './demos/debounced/debounced-demo';
 import { DevicePostureDemo } from './demos/device-posture/device-posture-demo';
 import { DisplayMediaDemo } from './demos/display-media/display-media-demo';
+import { DocumentPictureInPictureDemo } from './demos/document-picture-in-picture/document-picture-in-picture-demo';
 import { DropzoneDemo } from './demos/dropzone/dropzone-demo';
 import { EyeDropperDemo } from './demos/eye-dropper/eye-dropper-demo';
 import { FileDialogDemo } from './demos/file-dialog/file-dialog-demo';
@@ -80,6 +81,7 @@ const DEMOS = [
   { component: DevicePixelRatioDemo, name: 'signality-demo-device-pixel-ratio' },
   { component: DevicePostureDemo, name: 'signality-demo-device-posture' },
   { component: DisplayMediaDemo, name: 'signality-demo-display-media' },
+  { component: DocumentPictureInPictureDemo, name: 'signality-demo-document-picture-in-picture' },
   { component: DropzoneDemo, name: 'signality-demo-dropzone' },
   { component: EyeDropperDemo, name: 'signality-demo-eye-dropper' },
   { component: FileDialogDemo, name: 'signality-demo-file-dialog' },

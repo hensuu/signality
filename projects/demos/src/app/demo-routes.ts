@@ -66,6 +66,14 @@ export const DEMO_ROUTES: Route[] = [
       import('../demos/display-media/display-media-demo').then(m => m.DisplayMediaDemo),
   },
   {
+    path: 'document-picture-in-picture',
+    title: 'DocumentPictureInPicture',
+    loadComponent: () =>
+      import('../demos/document-picture-in-picture/document-picture-in-picture-demo').then(
+        m => m.DocumentPictureInPictureDemo
+      ),
+  },
+  {
     path: 'dropzone',
     title: 'Dropzone',
     loadComponent: () => import('../demos/dropzone/dropzone-demo').then(m => m.DropzoneDemo),
