@@ -7,7 +7,9 @@ export interface ToValueFn {
 }
 
 export const toValue: ToValueFn = (() => {
-  const fn = toValueFn as ToValueFn;
+  // Wrapped so that the internal `untracked` flag is never set by a caller passing extra
+  // arguments, e.g. the index when used as an `Array#map` callback
+  const fn = (<T>(v: MaybeSignal<T>) => toValueFn(v)) as ToValueFn;
   fn.untracked = v => toValueFn(v, true);
   return fn;
 })();

@@ -19,7 +19,9 @@ export interface ToElementBase {
 }
 
 export const toElement: ToElementFn = (() => {
-  const fn = toElementFn as ToElementFn;
+  // Wrapped so that the internal `untracked` flag is never set by a caller passing extra
+  // arguments, e.g. the index when used as an `Array#map` callback
+  const fn = (v => toElementFn(v)) as ToElementFn;
   fn.untracked = v => toElementFn(v, true);
   return fn;
 })();
